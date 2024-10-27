@@ -468,8 +468,23 @@
     return result; // Trả về chuỗi ngẫu nhiên
 }
 
-       function refreshOutput() {
+  function runCode() {
+        const html = htmlEditor.getValue();
+        const css = cssEditor.getValue();
+        const js = jsEditor.getValue();
+        const output =
+          document.getElementById("outputFrame").contentWindow.document;
 
+        output.open();
+        output.write(
+          html + "<style>" + css + "</style><script>" + js + "<\/script>",
+        );
+        output.close();
+      }
+
+       function refreshOutput() {
+         runCode();
+         
     // Tạo mã ngẫu nhiên
     const randomCode = generateRandomCode(); // Gọi hàm generateRandomCode
        
