@@ -467,6 +467,30 @@
     }
     return result; // Trả về chuỗi ngẫu nhiên
 }
+      function saveCode() {
+    const html = htmlEditor.getValue(); // Lấy mã HTML
+    const css = cssEditor.getValue(); // Lấy mã CSS
+    const js = jsEditor.getValue(); // Lấy mã JavaScript
+
+    // Lưu vào localStorage
+    localStorage.setItem('savedHTML', html);
+    localStorage.setItem('savedCSS', css);
+    localStorage.setItem('savedJS', js);
+}
+
+function loadCode() {
+    const html = localStorage.getItem('savedHTML') || ''; // Lấy mã HTML đã lưu
+    const css = localStorage.getItem('savedCSS') || ''; // Lấy mã CSS đã lưu
+    const js = localStorage.getItem('savedJS') || ''; // Lấy mã JavaScript đã lưu
+
+    htmlEditor.setValue(html); // Thiết lập mã HTML cho trình chỉnh sửa
+    cssEditor.setValue(css); // Thiết lập mã CSS cho trình chỉnh sửa
+    jsEditor.setValue(js); // Thiết lập mã JavaScript cho trình chỉnh sửa
+}
+document.addEventListener('DOMContentLoaded', function() {
+    loadCode(); // Gọi hàm tải mã khi trang được mở
+});
+
 
   function runCode() {
         const html = htmlEditor.getValue();
@@ -482,12 +506,13 @@
         output.close();
       }
 
-       function refreshOutput() {
-         runCode();
-         
+      function refreshOutput() {
+    saveCode(); // Lưu mã trước khi thay đổi URL
+    runCode(); // Cập nhật nội dung iframe
+
     // Tạo mã ngẫu nhiên
     const randomCode = generateRandomCode(); // Gọi hàm generateRandomCode
-       
+
     // Cập nhật địa chỉ bar với subdomain và random code
     const newAddress = `https://${randomCode}.shadow-codex-copy-vi.vercel.app/index.html`; // Địa chỉ mới
     const addressInput = document.getElementById("address");
@@ -495,6 +520,9 @@
 
     // Sử dụng History API để thay đổi URL trong thanh địa chỉ mà không làm mới trang
     window.history.pushState({ path: newAddress }, '', newAddress);
+
+    // Đóng trang hiện tại và mở lại URL mới
+    window.location.href = newAddress; // Chuyển hướng đến địa chỉ mới
 }
 
 
