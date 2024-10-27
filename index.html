@@ -1,912 +1,887 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ShadowCodex - Trình biên tập</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css"
-    />
-    <link
-      type="img/png"
-      rel="icon"
-      href="https://avatars.githubusercontent.com/u/43654435?s=200&v=4"
-    />
-    <style>
-      body {
-        margin: 0;
-        font-family: "Courier New", monospace;
-        background-color: #1e1e1e;
-        color: #ffffff;
-      }
 
-      .navbar {
-        background-color: #444;
-        color: #fff;
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 16px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShadowCodex - Trình biên tập</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css" />
+  <link type="img/png" rel="icon" href="https://avatars.githubusercontent.com/u/43654435?s=200&v=4" />
+  <style>
+    body {
+      margin: 0;
+      font-family: "Courier New", monospace;
+      background-color: #1e1e1e;
+      color: #ffffff;
+    }
 
-      .main-container {
-        display: flex;
-        height: calc(100vh - 50px);
-        padding: 0 10px;
-        gap: 15px;
-      }
+    .navbar {
+      background-color: #444;
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
 
-      .panel {
-        flex: 1;
-        padding: 20px;
-        background-color: #282c34;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        overflow-y: auto;
-      }
+    .main-container {
+      display: flex;
+      height: calc(100vh - 50px);
+      padding: 0 10px;
+      gap: 15px;
+    }
 
-      .CodeMirror {
-        height: 300px;
-        background-color: #282c34;
-        color: #ffffff;
-        font-size: 16px;
-        border-radius: 5px;
-        border: 1px solid #444;
-      }
+    .panel {
+      flex: 1;
+      padding: 20px;
+      background-color: #282c34;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+    }
 
-      #outputFrame {
-        width: 100%;
-        height: 400px;
-        border: none;
-        background-color: #111;
-        color: #8be9fd;
-      }
+    .CodeMirror {
+      height: 300px;
+      background-color: #282c34;
+      color: #ffffff;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #444;
+    }
 
-      .status-bar {
-        background-color: #333;
-        color: #fff;
-        padding: 10px 20px;
-        position: relative;
-        bottom: 0;
-        width: 100%;
-        font-size: 14px;
-        display: flex;
-        justify-content: space-between;
-      }
+    #outputFrame {
+      width: 100%;
+      height: 400px;
+      border: none;
+      background-color: #111;
+      color: #8be9fd;
+    }
 
-      .editor-container {
-        position: relative;
-        margin-bottom: 20px;
-      }
+    .status-bar {
+      background-color: #333;
+      color: #fff;
+      padding: 10px 20px;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
 
-      .hidden {
-        position: absolute;
-        visibility: hidden;
-        display: block;
-      }
+    .editor-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
 
-      .tab-buttons {
-        margin-bottom: 10px;
-      }
+    .hidden {
+      position: absolute;
+      visibility: hidden;
+      display: block;
+    }
 
-      .tab-button {
-        padding: 10px;
-        background-color: #444;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-right: 10px;
-        transition: background-color 0.3s;
-      }
+    .tab-buttons {
+      margin-bottom: 10px;
+    }
 
-      .tab-button:hover {
-        background-color: #666;
-      }
+    .tab-button {
+      padding: 10px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      transition: background-color 0.3s;
+    }
 
-      .tab-button.active {
-        background-color: #50fa7b;
-      }
+    .tab-button:hover {
+      background-color: #666;
+    }
 
-      .address-bar {
-        margin-bottom: 5px;
-        padding: 3px 66px 3px 3px;
-        background-color: #444;
-        color: #fff;
-        border-radius: 5px;
-        display: flex;
-        align-items: center;
-        font-size: 14px;
-      }
+    .tab-button.active {
+      background-color: #50fa7b;
+    }
 
-      .external-link {
-        position: absolute;
-        right: 30px;
-        top: 61px;
-        cursor: pointer;
-        opacity: 0.6;
-        transition: 0.3s opacity;
-      }
+    .address-bar {
+      margin-bottom: 5px;
+      padding: 3px 66px 3px 3px;
+      background-color: #444;
+      color: #fff;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
 
-      .external-link:hover {
-        opacity: 0.8;
-      }
-      .copy-icon {
-        position: absolute;
-        right: 63px;
-        top: 65px;
-        cursor: pointer;
-        opacity: 0.8;
-        transition: opacity 0.3s;
-      }
+    .external-link {
+      position: absolute;
+      right: 30px;
+      top: 61px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: 0.3s opacity;
+    }
 
-      .copy-icon:hover {
-        opacity: 1.2;
-      }
+    .external-link:hover {
+      opacity: 0.8;
+    }
 
-      .refresh-button {
-        font-size: 20px;
-        color: #fff;
-        border: none;
-        background: none;
-        cursor: pointer;
-        margin-right: 5px;
-        opacity: 0.7;
-        transition: opacity 0.3s;
-      }
+    .copy-icon {
+      position: absolute;
+      right: 63px;
+      top: 65px;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
 
-      .refresh-button:hover {
-        opacity: 1;
-        background-color: #444;
-      }
+    .copy-icon:hover {
+      opacity: 1.2;
+    }
 
-      input[type="text"] {
-        flex: 1;
-        border: none;
-        background: #333;
-        color: #fff;
-        padding: 3px;
-        border-radius: 5px;
-        font-size: 12px;
-        padding-left: 25px;
-      }
+    .refresh-button {
+      font-size: 20px;
+      color: #fff;
+      border: none;
+      background: none;
+      cursor: pointer;
+      margin-right: 5px;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
 
-      .autocomplete-container {
-        position: relative;
-        width: 300px;
-        margin-top: 10px;
-      }
+    .refresh-button:hover {
+      opacity: 1;
+      background-color: #444;
+    }
 
-      .suggestions {
-        position: absolute;
-        background: white;
-        border: 1px solid #ccc;
-        border-radius: 4px 4px 4px 4px;
-        margin-top: 0;
-        padding: 0;
-        list-style: none;
-        max-height: 200px;
-        overflow-y: auto;
-        z-index: 1000;
-      }
+    input[type="text"] {
+      flex: 1;
+      border: none;
+      background: #333;
+      color: #fff;
+      padding: 3px;
+      border-radius: 5px;
+      font-size: 12px;
+      padding-left: 25px;
+    }
 
-      .suggestion-item {
-        padding: 10px;
-        cursor: pointer;
-      }
+    .autocomplete-container {
+      position: relative;
+      width: 300px;
+      margin-top: 10px;
+    }
 
-      .suggestion-item:hover,
-      .suggestion-item.active {
-        background-color: #b3d4fc;
-        color: #000;
-      }
+    .suggestions {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px 4px 4px 4px;
+      margin-top: 0;
+      padding: 0;
+      list-style: none;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
 
-      .suggestion-item.active {
-        background-color: #50fa7b;
-        color: #000;
-      }
-      /* Chú thích và mũi tên điều hướng */
-      #note {
-        position: absolute;
-        top: 10px;
-        right: 20px;
-        background-color: #444;
-        padding: 10px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        transition:
-          transform 0.3s ease,
-          opacity 0.2s ease;
-      }
+    .suggestion-item {
+      padding: 10px;
+      cursor: pointer;
+    }
 
-      #note.collapsed {
-        transform: translateX(200%);
-        opacity: 0;
-      }
+    .suggestion-item:hover,
+    .suggestion-item.active {
+      background-color: #b3d4fc;
+      color: #000;
+    }
 
-      #toggleNote {
-        position: absolute;
-        top: 3px;
-        right: 0px;
-        background-color: #444;
-        color: #fff;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-        border-radius: 5px 5px 5px 5px;
-        font-size: 20px;
-      }
+    .suggestion-item.active {
+      background-color: #50fa7b;
+      color: #000;
+    }
 
-      #toggleNote:hover {
-        background-color: #555;
-      }
+    /* Chú thích và mũi tên điều hướng */
+    #note {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      background-color: #444;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition:
+        transform 0.3s ease,
+        opacity 0.2s ease;
+    }
 
-      /* Chú thích và mũi tên điều hướng */
-      #note1 {
-        position: absolute;
-        background-color: #444;
-        top: 800px;
-        right: 15px;
-        padding: 10px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        transition:
-          transform 0.3s ease,
-          opacity 0.2s ease;
-      }
+    #note.collapsed {
+      transform: translateX(200%);
+      opacity: 0;
+    }
 
-      #note1.collapsed {
-        transform: translateX(200%);
-        opacity: 0;
-      }
+    #toggleNote {
+      position: absolute;
+      top: 3px;
+      right: 0px;
+      background-color: #444;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px 5px 5px 5px;
+      font-size: 20px;
+    }
 
-      #toggleNote1 {
-        position: absolute;
-        background-color: #444;
-        right: 0px;
-        top: 793px;
-        color: #fff;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-        border-radius: 5px 5px 5px 5px;
-        font-size: 20px;
-      }
+    #toggleNote:hover {
+      background-color: #555;
+    }
 
-      #toggleNote1:hover {
-        background-color: #555;
-      }
-      .popup-text {
-        visibility: hidden;
-        background-color: #333;
-        color: #fff;
-        text-align: center;
-        border-radius: 5px;
-        padding: 5px;
-        position: absolute;
-        z-index: 1;
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-        font-size: 12px;
-        top: 93px; /* Căn chỉnh phía dưới hình ảnh */
-        left: 95.1%;
-        transform: translateX(-50%);
-      }
+    /* Chú thích và mũi tên điều hướng */
+    #note1 {
+      position: absolute;
+      background-color: #444;
+      top: 800px;
+      right: 15px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition:
+        transform 0.3s ease,
+        opacity 0.2s ease;
+    }
 
-      .show {
-        visibility: visible;
-        opacity: 1;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="navbar">
-      <div class="title">ShadowCodex - Trình biên tập</div>
-    </div>
+    #note1.collapsed {
+      transform: translateX(200%);
+      opacity: 0;
+    }
 
-    <div class="main-container">
-      <div class="panel" id="inputPanel">
-        <div class="tab-buttons">
-          <button class="tab-button active" onclick="showEditor('html')">
-            HTML
-          </button>
-          <button class="tab-button" onclick="showEditor('css')">CSS</button>
-          <button class="tab-button" onclick="showEditor('js')">
-            JavaScript
-          </button>
-        </div>
+    #toggleNote1 {
+      position: absolute;
+      background-color: #444;
+      right: 0px;
+      top: 793px;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px 5px 5px 5px;
+      font-size: 20px;
+    }
 
-        <div id="htmlPanel" class="editor-container">
-          <textarea id="html-editor"></textarea>
-        </div>
+    #toggleNote1:hover {
+      background-color: #555;
+    }
 
-        <div id="cssPanel" class="editor-container hidden">
-          <textarea id="css-editor"></textarea>
-        </div>
+    .popup-text {
+      visibility: hidden;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      font-size: 12px;
+      top: 93px;
+      /* Căn chỉnh phía dưới hình ảnh */
+      left: 95.1%;
+      transform: translateX(-50%);
+    }
 
-        <div id="jsPanel" class="editor-container hidden">
-          <textarea id="js-editor"></textarea>
-        </div>
+    .show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="title">ShadowCodex - Trình biên tập</div>
+  </div>
+
+  <div class="main-container">
+    <div class="panel" id="inputPanel">
+      <div class="tab-buttons">
+        <button class="tab-button active" onclick="showEditor('html')">
+          HTML
+        </button>
+        <button class="tab-button" onclick="showEditor('css')">CSS</button>
+        <button class="tab-button" onclick="showEditor('js')">
+          JavaScript
+        </button>
       </div>
 
-      <div class="panel" id="outputPanel">
-        <div class="address-bar">
-          <button class="refresh-button" onclick="refreshOutput()">⟳</button>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="external-link"
-            id="external-link-icon"
-          >
-            <!-- Hộp chính -->
-            <path
-              d="M10 9H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-6"
-            />
-            <!-- Đầu mũi tên -->
-            <path d="M13 7h4v4" />
-            <!-- Thanh mũi tên -->
-            <path d="M12 12L17 7" />
-          </svg>
-          <img
-            src="https://img.icons8.com/?size=100&id=86216&format=png&color=FFFFFF"
-            width="20"
-            height="20"
-            alt="icon"
-            id="copy"
-            class="copy-icon"
-          />
-          <div id="popup" class="popup-text">Copied!</div>
+      <div id="htmlPanel" class="editor-container">
+        <textarea id="html-editor"></textarea>
+      </div>
 
-          <input
-            type="text"
-            id="address"
-            placeholder="Địa chỉ trang web"
-            readonly
-          />
-        </div>
-        <iframe id="outputFrame"></iframe>
+      <div id="cssPanel" class="editor-container hidden">
+        <textarea id="css-editor"></textarea>
+      </div>
+
+      <div id="jsPanel" class="editor-container hidden">
+        <textarea id="js-editor"></textarea>
       </div>
     </div>
 
-    <div class="status-bar">
-      <span>Số hàng: <span id="lineCount">1</span></span>
+    <div class="panel" id="outputPanel">
+      <div class="address-bar">
+        <button class="refresh-button" onclick="refreshOutput()">⟳</button>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="external-link" id="external-link-icon">
+          <!-- Hộp chính -->
+          <path d="M10 9H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-6" />
+          <!-- Đầu mũi tên -->
+          <path d="M13 7h4v4" />
+          <!-- Thanh mũi tên -->
+          <path d="M12 12L17 7" />
+        </svg>
+        <img src="https://img.icons8.com/?size=100&id=86216&format=png&color=FFFFFF" width="20" height="20" alt="icon"
+          id="copy" class="copy-icon" />
+        <div id="popup" class="popup-text">Copied!</div>
+
+        <input type="text" id="address" placeholder="Địa chỉ trang web" readonly />
+      </div>
+      <iframe id="outputFrame"></iframe>
     </div>
+  </div>
 
-    <!-- Chú thích và nút điều hướng -->
-    <div id="note">
-      Ấn nút làm mới để tạo địa chỉ trang web và hãy sao chép tất cả trong đó để
-      đi đến trang web.
-    </div>
-    <button id="toggleNote" onclick="toggleNote()">⮜</button>
-    <div id="note1">Ấn Ctrl + Enter để tạo closing tag</div>
-    <button id="toggleNote1" onclick="toggleNote1()">⮜</button>
+  <div class="status-bar">
+    <span>Số hàng: <span id="lineCount">1</span></span>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/css/css.min.js"></script>
-    <script>
-      const htmlEditor = CodeMirror.fromTextArea(
-        document.getElementById("html-editor"),
-        {
-          mode: "htmlmixed",
-          lineNumbers: true,
-          theme: "dracula",
-        },
-      );
+  <!-- Chú thích và nút điều hướng -->
+  <div id="note">
+    Ấn nút làm mới để tạo địa chỉ trang web và hãy sao chép tất cả trong đó để
+    đi đến trang web.
+  </div>
+  <button id="toggleNote" onclick="toggleNote()">⮜</button>
+  <div id="note1">Ấn Ctrl + Enter để tạo closing tag</div>
+  <button id="toggleNote1" onclick="toggleNote1()">⮜</button>
 
-      const cssEditor = CodeMirror.fromTextArea(
-        document.getElementById("css-editor"),
-        {
-          mode: "css",
-          lineNumbers: true,
-          theme: "dracula",
-        },
-      );
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/css/css.min.js"></script>
+  <script>
+    const htmlEditor = CodeMirror.fromTextArea(
+      document.getElementById("html-editor"),
+      {
+        mode: "htmlmixed",
+        lineNumbers: true,
+        theme: "dracula",
+      },
+    );
 
-      const jsEditor = CodeMirror.fromTextArea(
-        document.getElementById("js-editor"),
-        {
-          mode: "javascript",
-          lineNumbers: true,
-          theme: "dracula",
-        },
-      );
+    const cssEditor = CodeMirror.fromTextArea(
+      document.getElementById("css-editor"),
+      {
+        mode: "css",
+        lineNumbers: true,
+        theme: "dracula",
+      },
+    );
 
-      const editors = [htmlEditor, cssEditor, jsEditor];
+    const jsEditor = CodeMirror.fromTextArea(
+      document.getElementById("js-editor"),
+      {
+        mode: "javascript",
+        lineNumbers: true,
+        theme: "dracula",
+      },
+    );
 
-      function showEditor(type) {
-        document.getElementById("htmlPanel").classList.add("hidden");
-        document.getElementById("cssPanel").classList.add("hidden");
-        document.getElementById("jsPanel").classList.add("hidden");
+    const editors = [htmlEditor, cssEditor, jsEditor];
 
-        if (type === "html") {
-          document.getElementById("htmlPanel").classList.remove("hidden");
-          setActiveTab(0);
-        } else if (type === "css") {
-          document.getElementById("cssPanel").classList.remove("hidden");
-          setActiveTab(1);
-        } else if (type === "js") {
-          document.getElementById("jsPanel").classList.remove("hidden");
-          setActiveTab(2);
-        }
+    function showEditor(type) {
+      document.getElementById("htmlPanel").classList.add("hidden");
+      document.getElementById("cssPanel").classList.add("hidden");
+      document.getElementById("jsPanel").classList.add("hidden");
+
+      if (type === "html") {
+        document.getElementById("htmlPanel").classList.remove("hidden");
+        setActiveTab(0);
+      } else if (type === "css") {
+        document.getElementById("cssPanel").classList.remove("hidden");
+        setActiveTab(1);
+      } else if (type === "js") {
+        document.getElementById("jsPanel").classList.remove("hidden");
+        setActiveTab(2);
       }
+    }
 
-      function setActiveTab(index) {
-        const buttons = document.querySelectorAll(".tab-button");
-        buttons.forEach((btn) => btn.classList.remove("active"));
-        buttons[index].classList.add("active");
-      }
-      
+    function setActiveTab(index) {
+      const buttons = document.querySelectorAll(".tab-button");
+      buttons.forEach((btn) => btn.classList.remove("active"));
+      buttons[index].classList.add("active");
+    }
 
 
-         
 
-  
-           function generateRandomCode() {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    const length = 8; // Độ dài của chuỗi ngẫu nhiên bạn muốn tạo
 
-    for (let i = 0; i < length; i++) {
+
+
+    function generateRandomCode() {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+      const length = 8; // Độ dài của chuỗi ngẫu nhiên bạn muốn tạo
+
+      for (let i = 0; i < length; i++) {
         const randomIndex = Math.floor(Math.random() * characters.length);
         result += characters[randomIndex];
+      }
+      return result; // Trả về chuỗi ngẫu nhiên
     }
-    return result; // Trả về chuỗi ngẫu nhiên
-}
-      function saveCode() {
-    const html = htmlEditor.getValue(); // Lấy mã HTML
-    const css = cssEditor.getValue(); // Lấy mã CSS
-    const js = jsEditor.getValue(); // Lấy mã JavaScript
+    function saveCode() {
+      const html = htmlEditor.getValue(); // Lấy mã HTML
+      const css = cssEditor.getValue(); // Lấy mã CSS
+      const js = jsEditor.getValue(); // Lấy mã JavaScript
 
-    // Lưu vào localStorage
-    localStorage.setItem('savedHTML', html);
-    localStorage.setItem('savedCSS', css);
-    localStorage.setItem('savedJS', js);
-}
+      // Lưu vào localStorage
+      localStorage.setItem('savedHTML', html);
+      localStorage.setItem('savedCSS', css);
+      localStorage.setItem('savedJS', js);
+    }
 
-function loadCode() {
-    const html = localStorage.getItem('savedHTML') || ''; // Lấy mã HTML đã lưu
-    const css = localStorage.getItem('savedCSS') || ''; // Lấy mã CSS đã lưu
-    const js = localStorage.getItem('savedJS') || ''; // Lấy mã JavaScript đã lưu
+    function loadCode() {
+      const html = localStorage.getItem('savedHTML') || ''; // Lấy mã HTML đã lưu
+      const css = localStorage.getItem('savedCSS') || ''; // Lấy mã CSS đã lưu
+      const js = localStorage.getItem('savedJS') || ''; // Lấy mã JavaScript đã lưu
 
-    htmlEditor.setValue(html); // Thiết lập mã HTML cho trình chỉnh sửa
-    cssEditor.setValue(css); // Thiết lập mã CSS cho trình chỉnh sửa
-    jsEditor.setValue(js); // Thiết lập mã JavaScript cho trình chỉnh sửa
-}
-document.addEventListener('DOMContentLoaded', function() {
-    loadCode(); // Gọi hàm tải mã khi trang được mở
-});
+      htmlEditor.setValue(html); // Thiết lập mã HTML cho trình chỉnh sửa
+      cssEditor.setValue(css); // Thiết lập mã CSS cho trình chỉnh sửa
+      jsEditor.setValue(js); // Thiết lập mã JavaScript cho trình chỉnh sửa
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      loadCode(); // Gọi hàm tải mã khi trang được mở
+    });
 
 
-  function runCode() {
-        const html = htmlEditor.getValue();
-        const css = cssEditor.getValue();
-        const js = jsEditor.getValue();
-        const output =
-          document.getElementById("outputFrame").contentWindow.document;
+    function runCode() {
+      const html = htmlEditor.getValue();
+      const css = cssEditor.getValue();
+      const js = jsEditor.getValue();
+      const output =
+        document.getElementById("outputFrame").contentWindow.document;
 
-        output.open();
-        output.write(
-          html + "<style>" + css + "</style><script>" + js + "<\/script>",
-        );
-        output.close();
+      output.open();
+      output.write(
+        html + "<style>" + css + "</style><script>" + js + "<\/script>",
+      );
+      output.close();
+    }
+
+    function refreshOutput() {
+      saveCode(); // Lưu mã trước khi thay đổi URL
+      runCode(); // Cập nhật nội dung iframe
+
+      // Tạo mã ngẫu nhiên
+      const randomCode = generateRandomCode(); // Gọi hàm generateRandomCode
+
+      // Cập nhật địa chỉ bar với subdomain và random code
+      const newAddress = `https://${randomCode}.shadow-codex-copy-vi.vercel.app/index.html`; // Địa chỉ mới
+      const addressInput = document.getElementById("address");
+      addressInput.value = newAddress; // Hiển thị trong input
+
+      // Sử dụng History API để thay đổi URL trong thanh địa chỉ mà không làm mới trang
+      window.history.pushState({path: newAddress}, '', newAddress);
+
+      // Đóng trang hiện tại và mở lại URL mới
+      window.location.href = newAddress; // Chuyển hướng đến địa chỉ mới
+    }
+
+
+
+
+
+
+    // Cập nhật số hàng
+    htmlEditor.on("change", () => {
+      document.getElementById("lineCount").textContent =
+        htmlEditor.lineCount();
+    });
+
+    cssEditor.on("change", () => {
+      document.getElementById("lineCount").textContent =
+        cssEditor.lineCount();
+    });
+
+    jsEditor.on("change", () => {
+      document.getElementById("lineCount").textContent = jsEditor.lineCount();
+    });
+    function toggleNote1() {
+      const note = document.getElementById("note1");
+      const arrowButton = document.getElementById("toggleNote1");
+
+      if (isCollapsed) {
+        note.classList.remove("collapsed");
+        arrowButton.textContent = "⮜"; // Mũi tên quay lại
+      } else {
+        note.classList.add("collapsed");
+        arrowButton.textContent = "⮞"; // Mũi tên đi ra
       }
 
-      function refreshOutput() {
-    saveCode(); // Lưu mã trước khi thay đổi URL
-    runCode(); // Cập nhật nội dung iframe
+      isCollapsed = !isCollapsed;
+    }
 
-    // Tạo mã ngẫu nhiên
-    const randomCode = generateRandomCode(); // Gọi hàm generateRandomCode
+    // Chức năng thu gọn và mở chú thích
+    let isCollapsed = false;
 
-    // Cập nhật địa chỉ bar với subdomain và random code
-    const newAddress = `https://${randomCode}.shadow-codex-copy-vi.vercel.app/index.html`; // Địa chỉ mới
-    const addressInput = document.getElementById("address");
-    addressInput.value = newAddress; // Hiển thị trong input
+    function toggleNote() {
+      const note = document.getElementById("note");
+      const arrowButton = document.getElementById("toggleNote");
 
-    // Sử dụng History API để thay đổi URL trong thanh địa chỉ mà không làm mới trang
-    window.history.pushState({ path: newAddress }, '', newAddress);
-
-    // Đóng trang hiện tại và mở lại URL mới
-    window.location.href = newAddress; // Chuyển hướng đến địa chỉ mới
-}
-
-
-
-
-
-
-      // Cập nhật số hàng
-      htmlEditor.on("change", () => {
-        document.getElementById("lineCount").textContent =
-          htmlEditor.lineCount();
-      });
-
-      cssEditor.on("change", () => {
-        document.getElementById("lineCount").textContent =
-          cssEditor.lineCount();
-      });
-
-      jsEditor.on("change", () => {
-        document.getElementById("lineCount").textContent = jsEditor.lineCount();
-      });
-      function toggleNote1() {
-        const note = document.getElementById("note1");
-        const arrowButton = document.getElementById("toggleNote1");
-
-        if (isCollapsed) {
-          note.classList.remove("collapsed");
-          arrowButton.textContent = "⮜"; // Mũi tên quay lại
-        } else {
-          note.classList.add("collapsed");
-          arrowButton.textContent = "⮞"; // Mũi tên đi ra
-        }
-
-        isCollapsed = !isCollapsed;
+      if (isCollapsed) {
+        note.classList.remove("collapsed");
+        arrowButton.textContent = "⮜"; // Mũi tên quay lại
+      } else {
+        note.classList.add("collapsed");
+        arrowButton.textContent = "⮞"; // Mũi tên đi ra
       }
 
-      // Chức năng thu gọn và mở chú thích
-      let isCollapsed = false;
+      isCollapsed = !isCollapsed;
+    }
+    const tags = [
+      "html",
+      "head",
+      "body",
+      "!DOCTYPE html",
+      "title",
+      "h1",
+      "h2",
+      "h3",
+      "p",
+      "a",
+      "div",
+      "span",
+      "ul",
+      "li",
+      "table",
+      "tr",
+      "td",
+      "form",
+      "input",
+      "button",
+      "link",
+      "script",
+      "style",
+      "footer",
+      "header",
+      "section",
+      "article",
+      "main",
+      "br",
+      "img",
+      "hr",
+      "ol",
+      "th",
+      "label",
+      "select",
+      "option",
+      "textarea",
+      "fieldset",
+      "legend",
+      "strong",
+      "em",
+      "b",
+      "i",
+      "u",
+      "blockquote",
+      "pre",
+      "code",
+      "main",
+      "summary",
+      "details",
+      "dialog",
+      "base",
+      "col",
+      "embed",
+      "source",
+      "track",
+      "wbr",
+      "area",
+      "param",
+    ];
 
-      function toggleNote() {
-        const note = document.getElementById("note");
-        const arrowButton = document.getElementById("toggleNote");
+    const selfClosingTags = [
+      "input",
+      "br",
+      "img",
+      "hr",
+      "link",
+      "meta",
+      "base",
+      "col",
+      "embed",
+      "source",
+      "track",
+      "wbr",
+      "area",
+      "param",
+      "!DOCTYPE html",
+    ];
 
-        if (isCollapsed) {
-          note.classList.remove("collapsed");
-          arrowButton.textContent = "⮜"; // Mũi tên quay lại
-        } else {
-          note.classList.add("collapsed");
-          arrowButton.textContent = "⮞"; // Mũi tên đi ra
-        }
+    // Keyup event to handle tag suggestions
+    htmlEditor.on("keyup", function (cm, event) {
+      const cursor = cm.getCursor();
+      const lineContent = cm.getLine(cursor.line);
+      const beforeCursor = lineContent.substring(0, cursor.ch); // Nội dung trước con trỏ
 
-        isCollapsed = !isCollapsed;
+      // Kiểm tra nếu nội dung trước con trỏ chứa `<` và sau đó là ký tự chữ cái
+      const tagMatch = beforeCursor.match(/<([a-z]*)$/i);
+      if (tagMatch) {
+        showSuggestionsForEditor(
+          tags.filter((tag) => tag.startsWith(tagMatch[1])),
+          cursor,
+          cm,
+        ); // Gợi ý chỉ các thẻ phù hợp
+      } else if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+        clearSuggestions();
       }
-const tags = [
-        "html",
-        "head",
-        "body",
-        "!DOCTYPE html",
-        "title",
-        "h1",
-        "h2",
-        "h3",
-        "p",
-        "a",
-        "div",
-        "span",
-        "ul",
-        "li",
-        "table",
-        "tr",
-        "td",
-        "form",
-        "input",
-        "button",
-        "link",
-        "script",
-        "style",
-        "footer",
-        "header",
-        "section",
-        "article",
-        "main",
-        "br",
-        "img",
-        "hr",
-        "ol",
-        "th",
-        "label",
-        "select",
-        "option",
-        "textarea",
-        "fieldset",
-        "legend",
-        "strong",
-        "em",
-        "b",
-        "i",
-        "u",
-        "blockquote",
-        "pre",
-        "code",
-        "main",
-        "summary",
-        "details",
-        "dialog",
-        "base",
-        "col",
-        "embed",
-        "source",
-        "track",
-        "wbr",
-        "area",
-        "param",
-      ];
+    });
 
-      const selfClosingTags = [
-        "input",
-        "br",
-        "img",
-        "hr",
-        "link",
-        "meta",
-        "base",
-        "col",
-        "embed",
-        "source",
-        "track",
-        "wbr",
-        "area",
-        "param",
-        "!DOCTYPE html",
-      ];
+    // New Keydown event for automatic closing pairs
+    htmlEditor.on("keydown", function (cm, event) {
+      const cursor = cm.getCursor();
+      const lineContent = cm.getLine(cursor.line);
 
-      // Keyup event to handle tag suggestions
-      htmlEditor.on("keyup", function (cm, event) {
-  const cursor = cm.getCursor();
-  const lineContent = cm.getLine(cursor.line);
-  const beforeCursor = lineContent.substring(0, cursor.ch); // Nội dung trước con trỏ
+      const autoClosePairs = {
+        "{": "}",
+        "(": ")",
+        "[": "]",
+        '"': '"',
+        "'": "'",
+      };
+      if (Object.keys(autoClosePairs).includes(event.key)) {
+        event.preventDefault(); // Prevent default behavior
 
-        // Kiểm tra nếu nội dung trước con trỏ chứa `<` và sau đó là ký tự chữ cái
-        const tagMatch = beforeCursor.match(/<([a-z]*)$/i);
-        if (tagMatch) {
-          showSuggestionsForEditor(
-            tags.filter((tag) => tag.startsWith(tagMatch[1])),
-            cursor,
-            cm,
-          ); // Gợi ý chỉ các thẻ phù hợp
-        } else if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+        // Insert the opening and closing pair
+        const pair = autoClosePairs[event.key];
+        cm.replaceRange(event.key + pair, cursor);
+
+        // Move the cursor between the pair
+        cm.setCursor({line: cursor.line, ch: cursor.ch + 1});
+      }
+    });
+
+    function showSuggestionsForEditor(suggestions, cursor, cm) {
+      clearSuggestions();
+
+      suggestionsList = document.createElement("ul");
+      suggestionsList.classList.add("suggestions");
+
+      const cursorCoords = cm.cursorCoords(cursor);
+      const editorContainer = cm.getWrapperElement();
+
+      suggestionsList.style.position = "absolute";
+      suggestionsList.style.left = `${cursorCoords.left}px`;
+      suggestionsList.style.top = `${cursorCoords.bottom}px`;
+      suggestionsList.style.backgroundColor = "#fff";
+      suggestionsList.style.border = "1px solid #ccc";
+      suggestionsList.style.zIndex = 1000;
+      suggestionsList.style.color = "#000";
+
+      suggestions.forEach((suggestion, index) => {
+        const li = document.createElement("li");
+        li.textContent = suggestion;
+        li.classList.add("suggestion-item");
+
+        li.addEventListener("mouseenter", () => {
+          selectedIndex = index;
+          updateActiveSuggestion(
+            document.querySelectorAll(".suggestion-item"),
+          );
+        });
+
+        li.addEventListener("click", function () {
+          insertTagIntoEditor(suggestion, cursor, cm);
           clearSuggestions();
-        }
+          cm.focus();
+        });
+
+        suggestionsList.appendChild(li);
       });
 
-      // New Keydown event for automatic closing pairs
-      htmlEditor.on("keydown", function (cm, event) {
+      // Automatically select the first suggestion
+      selectedIndex = 0;
+      updateActiveSuggestion(document.querySelectorAll(".suggestion-item"));
+      editorContainer.appendChild(suggestionsList);
+    }
+
+    // Điều hướng cho popup đầu tiên và đảm bảo mục được chọn luôn hiển thị
+    htmlEditor.on("keyup", function (cm, event) {
+      const items = document.querySelectorAll(".suggestion-item");
+      if (items.length === 0) return;
+
+      if (event.key === "ArrowDown") {
+        selectedIndex = (selectedIndex + 1) % items.length;
+        updateActiveSuggestion(items);
+        ensureVisible(items[selectedIndex]);
+        event.preventDefault();
+      } else if (event.key === "ArrowUp") {
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+        updateActiveSuggestion(items);
+        ensureVisible(items[selectedIndex]);
+        event.preventDefault();
+      } else if ((event.key === "Enter" || event.key === "Tab") && selectedIndex > -1) {
+        event.preventDefault();
+        const selectedSuggestion = items[selectedIndex].textContent;
+        insertTagIntoEditor(selectedSuggestion, cm.getCursor(), cm);
+        clearSuggestions();
+        cm.focus();
+      }
+    });
+
+    // Đảm bảo mục được chọn luôn nằm trong khung nhìn của popup
+    function ensureVisible(activeItem) {
+      const suggestionsBox = activeItem.parentNode;
+      const itemTop = activeItem.offsetTop;
+      const itemBottom = itemTop + activeItem.clientHeight;
+      const boxTop = suggestionsBox.scrollTop;
+      const boxBottom = boxTop + suggestionsBox.clientHeight;
+
+      if (itemTop < boxTop) {
+        suggestionsBox.scrollTop = itemTop;
+      } else if (itemBottom > boxBottom) {
+        suggestionsBox.scrollTop = itemBottom - suggestionsBox.clientHeight;
+      }
+    }
+
+    // Hàm cập nhật mục gợi ý đang chọn
+    function updateActiveSuggestion(items) {
+      items.forEach((item, index) => {
+        item.classList.remove("active");
+        if (index === selectedIndex) {
+          item.classList.add("active");
+          ensureVisible(item);
+        }
+      });
+    }
+
+
+    // Hàm đảm bảo mục được chọn luôn nằm trong vùng nhìn thấy
+    function ensureVisible(activeItem) {
+      const suggestionsBox = activeItem.parentNode;
+
+      // Vị trí của mục được chọn so với khung nhìn
+      const itemTop = activeItem.offsetTop;
+      const itemHeight = activeItem.clientHeight;
+      const boxHeight = suggestionsBox.clientHeight;
+      const boxScrollTop = suggestionsBox.scrollTop;
+
+      // Tính toán để mục được chọn nằm ở giữa khung nhìn nếu có thể
+      const scrollTo = itemTop - boxHeight / 2 + itemHeight / 2;
+
+      // Cập nhật cuộn của khung chứa gợi ý
+      suggestionsBox.scrollTop = scrollTo;
+    }
+
+
+
+    // Insert a tag into the editor at the cursor
+    function insertTagIntoEditor(tag, cursor, cm) {
+      const lineContent = cm.getLine(cursor.line);
+      const lastOpenBracketIndex = lineContent.lastIndexOf("<", cursor.ch);
+
+      const newLineContent =
+        lineContent.slice(0, lastOpenBracketIndex + 1) +
+        tag +
+        ">" +
+        lineContent.slice(cursor.ch);
+      cm.replaceRange(
+        newLineContent,
+        {line: cursor.line, ch: 0},
+        {line: cursor.line, ch: lineContent.length},
+      );
+
+      cm.setCursor({
+        line: cursor.line,
+        ch: lastOpenBracketIndex + tag.length + 2,
+      });
+    }
+
+    // Clear suggestions from the UI
+    function clearSuggestions() {
+      const existingSuggestions = document.querySelector(".suggestions");
+      if (existingSuggestions) {
+        existingSuggestions.remove();
+        suggestionsList = null;
+      }
+      selectedIndex = -1;
+    }
+
+    // Automatically close tag when Ctrl + Enter is pressed
+    htmlEditor.on("keydown", function (cm, event) {
+      if (event.ctrlKey && event.key === "Enter") {
         const cursor = cm.getCursor();
         const lineContent = cm.getLine(cursor.line);
+        const tagMatch = lineContent.match(/<(\w+)[^>]*?>$/);
 
-        const autoClosePairs = {
-          "{": "}",
-          "(": ")",
-          "[": "]",
-          '"': '"',
-          "'": "'",
-        };
-                if (Object.keys(autoClosePairs).includes(event.key)) {
-          event.preventDefault(); // Prevent default behavior
-
-          // Insert the opening and closing pair
-          const pair = autoClosePairs[event.key];
-          cm.replaceRange(event.key + pair, cursor);
-
-          // Move the cursor between the pair
-          cm.setCursor({ line: cursor.line, ch: cursor.ch + 1 });
+        if (tagMatch && !selfClosingTags.includes(tagMatch[1])) {
+          const closingTag = `</${tagMatch[1]}>`;
+          cm.replaceRange(closingTag, cm.getCursor());
         }
-      });
+        event.preventDefault();
+      }
+    });
+    // Keydown event to handle tab key for inserting suggestion
+    htmlEditor.on("keydown", function (cm, event) {
+      const cursor = cm.getCursor();
+      const items = document.querySelectorAll(".suggestion-item");
 
-      function showSuggestionsForEditor(suggestions, cursor, cm) {
+      if (event.key === "Tab" && selectedIndex > -1) {
+        event.preventDefault();
+        const selectedSuggestion = items[selectedIndex].textContent;
+        insertTagIntoEditor(selectedSuggestion, cursor, cm);
         clearSuggestions();
-
-        suggestionsList = document.createElement("ul");
-        suggestionsList.classList.add("suggestions");
-
-        const cursorCoords = cm.cursorCoords(cursor);
-        const editorContainer = cm.getWrapperElement();
-
-        suggestionsList.style.position = "absolute";
-        suggestionsList.style.left = `${cursorCoords.left}px`;
-        suggestionsList.style.top = `${cursorCoords.bottom}px`;
-        suggestionsList.style.backgroundColor = "#fff";
-        suggestionsList.style.border = "1px solid #ccc";
-        suggestionsList.style.zIndex = 1000;
-        suggestionsList.style.color = "#000";
-
-        suggestions.forEach((suggestion, index) => {
-          const li = document.createElement("li");
-          li.textContent = suggestion;
-          li.classList.add("suggestion-item");
-
-          li.addEventListener("mouseenter", () => {
-            selectedIndex = index;
-            updateActiveSuggestion(
-              document.querySelectorAll(".suggestion-item"),
-            );
-          });
-
-          li.addEventListener("click", function () {
-            insertTagIntoEditor(suggestion, cursor, cm);
-            clearSuggestions();
-            cm.focus();
-          });
-
-          suggestionsList.appendChild(li);
-        });
-
-        // Automatically select the first suggestion
-        selectedIndex = 0;
-        updateActiveSuggestion(document.querySelectorAll(".suggestion-item"));
-        editorContainer.appendChild(suggestionsList);  }
-
-// Điều hướng cho popup đầu tiên và đảm bảo mục được chọn luôn hiển thị
-htmlEditor.on("keyup", function (cm, event) {
-  const items = document.querySelectorAll(".suggestion-item");
-  if (items.length === 0) return;
-
-  if (event.key === "ArrowDown") {
-    selectedIndex = (selectedIndex + 1) % items.length;
-    updateActiveSuggestion(items);
-    ensureVisible(items[selectedIndex]);
-    event.preventDefault();
-  } else if (event.key === "ArrowUp") {
-    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-    updateActiveSuggestion(items);
-    ensureVisible(items[selectedIndex]);
-    event.preventDefault();
-  } else if ((event.key === "Enter" || event.key === "Tab") && selectedIndex > -1) {
-    event.preventDefault();
-    const selectedSuggestion = items[selectedIndex].textContent;
-    insertTagIntoEditor(selectedSuggestion, cm.getCursor(), cm);
-    clearSuggestions();
-    cm.focus();
-  }
-});
-
-// Đảm bảo mục được chọn luôn nằm trong khung nhìn của popup
-function ensureVisible(activeItem) {
-  const suggestionsBox = activeItem.parentNode;
-  const itemTop = activeItem.offsetTop;
-  const itemBottom = itemTop + activeItem.clientHeight;
-  const boxTop = suggestionsBox.scrollTop;
-  const boxBottom = boxTop + suggestionsBox.clientHeight;
-
-  if (itemTop < boxTop) {
-    suggestionsBox.scrollTop = itemTop;
-  } else if (itemBottom > boxBottom) {
-    suggestionsBox.scrollTop = itemBottom - suggestionsBox.clientHeight;
-  }
-}
-
-// Hàm cập nhật mục gợi ý đang chọn
-function updateActiveSuggestion(items) {
-  items.forEach((item, index) => {
-    item.classList.remove("active");
-    if (index === selectedIndex) {
-      item.classList.add("active");
-      ensureVisible(item);
-    }
-  });
-}
-
-
-// Hàm đảm bảo mục được chọn luôn nằm trong vùng nhìn thấy
-function ensureVisible(activeItem) {
-  const suggestionsBox = activeItem.parentNode;
-
-  // Vị trí của mục được chọn so với khung nhìn
-  const itemTop = activeItem.offsetTop;
-  const itemHeight = activeItem.clientHeight;
-  const boxHeight = suggestionsBox.clientHeight;
-  const boxScrollTop = suggestionsBox.scrollTop;
-
-  // Tính toán để mục được chọn nằm ở giữa khung nhìn nếu có thể
-  const scrollTo = itemTop - boxHeight / 2 + itemHeight / 2;
-
-  // Cập nhật cuộn của khung chứa gợi ý
-  suggestionsBox.scrollTop = scrollTo;
-}
-
-
-
-      // Insert a tag into the editor at the cursor
-      function insertTagIntoEditor(tag, cursor, cm) {
-        const lineContent = cm.getLine(cursor.line);
-        const lastOpenBracketIndex = lineContent.lastIndexOf("<", cursor.ch);
-
-        const newLineContent =
-          lineContent.slice(0, lastOpenBracketIndex + 1) +
-          tag +
-          ">" +
-          lineContent.slice(cursor.ch);
-        cm.replaceRange(
-          newLineContent,
-          { line: cursor.line, ch: 0 },
-          { line: cursor.line, ch: lineContent.length },
-        );
-
-        cm.setCursor({
-          line: cursor.line,
-          ch: lastOpenBracketIndex + tag.length + 2,
-        });
+        cm.focus();
       }
-
-      // Clear suggestions from the UI
-      function clearSuggestions() {
-        const existingSuggestions = document.querySelector(".suggestions");
-        if (existingSuggestions) {
-          existingSuggestions.remove();
-          suggestionsList = null;
-        }
-        selectedIndex = -1;
-      }
-
-      // Automatically close tag when Ctrl + Enter is pressed
-      htmlEditor.on("keydown", function (cm, event) {
-        if (event.ctrlKey && event.key === "Enter") {
-          const cursor = cm.getCursor();
-          const lineContent = cm.getLine(cursor.line);
-          const tagMatch = lineContent.match(/<(\w+)[^>]*?>$/);
-
-          if (tagMatch && !selfClosingTags.includes(tagMatch[1])) {
-            const closingTag = `</${tagMatch[1]}>`;
-            cm.replaceRange(closingTag, cm.getCursor());
-          }
-                    event.preventDefault();
+    });
+    document
+      .getElementById("external-link-icon")
+      .addEventListener("click", function () {
+        const url = document.getElementById("address").value;
+        if (url) {
+          window.open(url, "_blank"); // Open the URL in a new tab
         }
       });
-      // Keydown event to handle tab key for inserting suggestion
-htmlEditor.on("keydown", function (cm, event) {
-  const cursor = cm.getCursor();
-  const items = document.querySelectorAll(".suggestion-item");
+    document.getElementById("copy").addEventListener("click", function () {
+      // Lấy giá trị từ ô input
+      var addressValue = document.getElementById("address").value;
 
-  if (event.key === "Tab" && selectedIndex > -1) {
-    event.preventDefault();
-    const selectedSuggestion = items[selectedIndex].textContent;
-    insertTagIntoEditor(selectedSuggestion, cursor, cm);
-    clearSuggestions();
-    cm.focus();
-  }
-});
-      document
-        .getElementById("external-link-icon")
-        .addEventListener("click", function () {
-          const url = document.getElementById("address").value;
-          if (url) {
-            window.open(url, "_blank"); // Open the URL in a new tab
-          }
-        });
-      document.getElementById("copy").addEventListener("click", function () {
-        // Lấy giá trị từ ô input
-        var addressValue = document.getElementById("address").value;
+      // Kiểm tra nếu giá trị không trống
+      if (addressValue) {
+        // Tạo một phần tử tạm thời để sao chép giá trị
+        var tempInput = document.createElement("textarea");
+        tempInput.value = addressValue;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
 
-        // Kiểm tra nếu giá trị không trống
-        if (addressValue) {
-          // Tạo một phần tử tạm thời để sao chép giá trị
-          var tempInput = document.createElement("textarea");
-          tempInput.value = addressValue;
-          document.body.appendChild(tempInput);
-          tempInput.select();
-          tempInput.setSelectionRange(0, 99999);
-          document.execCommand("copy");
-          document.body.removeChild(tempInput);
+        // Hiển thị thông báo popup
+        var popup = document.getElementById("popup");
+        popup.classList.add("show");
 
-          // Hiển thị thông báo popup
-          var popup = document.getElementById("popup");
-          popup.classList.add("show");
-
-          // Ẩn popup sau 2 giây
-          setTimeout(function () {
-            popup.classList.remove("show");
-          }, 2000);
-        }
-        // Không cần thông báo khi không có giá trị
-      });
+        // Ẩn popup sau 2 giây
+        setTimeout(function () {
+          popup.classList.remove("show");
+        }, 2000);
+      }
+      // Không cần thông báo khi không có giá trị
+    });
 
 
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>
