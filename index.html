@@ -12,6 +12,11 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css"
     />
+    <link
+      type="img/png"
+      rel="icon"
+      href="https://avatars.githubusercontent.com/u/43654435?s=200&v=4"
+    />
     <style>
       body {
         margin: 0;
@@ -180,7 +185,7 @@
         position: absolute;
         background: white;
         border: 1px solid #ccc;
-        border-radius: 4px;
+        border-radius: 4px 4px 4px 4px;
         margin-top: 0;
         padding: 0;
         list-style: none;
@@ -442,35 +447,42 @@
         buttons.forEach((btn) => btn.classList.remove("active"));
         buttons[index].classList.add("active");
       }
+      
 
-      function runCode() {
-        const html = htmlEditor.getValue();
-        const css = cssEditor.getValue();
-        const js = jsEditor.getValue();
-        const output =
-          document.getElementById("outputFrame").contentWindow.document;
 
-        output.open();
-        output.write(
-          html + "<style>" + css + "</style><script>" + js + "<\/script>",
-        );
-        output.close();
-      }
+         
 
-      function refreshOutput() {
-        runCode();
+  
+           function generateRandomCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const length = 6; // Độ dài của chuỗi ngẫu nhiên bạn muốn tạo
 
-        // Tạo địa chỉ tạm thời
-        const html = htmlEditor.getValue();
-        const css = cssEditor.getValue();
-        const js = jsEditor.getValue();
-        const blob = new Blob(
-          [html + "<style>" + css + "</style><script>" + js + "<\/script>"],
-          { type: "text/html" },
-        );
-        const url = URL.createObjectURL(blob);
-        document.getElementById("address").value = url;
-      }
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        result += characters[randomIndex];
+    }
+    return result; // Trả về chuỗi ngẫu nhiên
+}
+
+       function refreshOutput() {
+
+    // Tạo mã ngẫu nhiên
+    const randomCode = generateRandomCode(); // Gọi hàm generateRandomCode
+       
+    // Cập nhật địa chỉ bar với subdomain và random code
+    const newAddress = `https://${randomCode}.shadowcodex.vercel.app/index.html`; // Địa chỉ mới
+    const addressInput = document.getElementById("address");
+    addressInput.value = newAddress; // Hiển thị trong input
+
+    // Sử dụng History API để thay đổi URL trong thanh địa chỉ mà không làm mới trang
+    window.history.pushState({ path: newAddress }, '', newAddress);
+}
+
+
+
+
+
 
       // Cập nhật số hàng
       htmlEditor.on("change", () => {
@@ -518,8 +530,7 @@
 
         isCollapsed = !isCollapsed;
       }
-
-      const tags = [
+const tags = [
         "html",
         "head",
         "body",
@@ -601,9 +612,9 @@
 
       // Keyup event to handle tag suggestions
       htmlEditor.on("keyup", function (cm, event) {
-        const cursor = cm.getCursor();
-        const lineContent = cm.getLine(cursor.line);
-        const beforeCursor = lineContent.substring(0, cursor.ch); // Nội dung trước con trỏ
+  const cursor = cm.getCursor();
+  const lineContent = cm.getLine(cursor.line);
+  const beforeCursor = lineContent.substring(0, cursor.ch); // Nội dung trước con trỏ
 
         // Kiểm tra nếu nội dung trước con trỏ chứa `<` và sau đó là ký tự chữ cái
         const tagMatch = beforeCursor.match(/<([a-z]*)$/i);
@@ -630,8 +641,7 @@
           '"': '"',
           "'": "'",
         };
-
-        if (Object.keys(autoClosePairs).includes(event.key)) {
+                if (Object.keys(autoClosePairs).includes(event.key)) {
           event.preventDefault(); // Prevent default behavior
 
           // Insert the opening and closing pair
@@ -684,62 +694,77 @@
         // Automatically select the first suggestion
         selectedIndex = 0;
         updateActiveSuggestion(document.querySelectorAll(".suggestion-item"));
+        editorContainer.appendChild(suggestionsList);  }
 
-        editorContainer.appendChild(suggestionsList);
-      }
+// Điều hướng cho popup đầu tiên và đảm bảo mục được chọn luôn hiển thị
+htmlEditor.on("keyup", function (cm, event) {
+  const items = document.querySelectorAll(".suggestion-item");
+  if (items.length === 0) return;
 
-      // Navigation for suggestions
-      htmlEditor.on("keydown", function (cm, event) {
-        const items = document.querySelectorAll(".suggestion-item");
-        if (items.length === 0) return;
+  if (event.key === "ArrowDown") {
+    selectedIndex = (selectedIndex + 1) % items.length;
+    updateActiveSuggestion(items);
+    ensureVisible(items[selectedIndex]);
+    event.preventDefault();
+  } else if (event.key === "ArrowUp") {
+    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+    updateActiveSuggestion(items);
+    ensureVisible(items[selectedIndex]);
+    event.preventDefault();
+  } else if ((event.key === "Enter" || event.key === "Tab") && selectedIndex > -1) {
+    event.preventDefault();
+    const selectedSuggestion = items[selectedIndex].textContent;
+    insertTagIntoEditor(selectedSuggestion, cm.getCursor(), cm);
+    clearSuggestions();
+    cm.focus();
+  }
+});
 
-        if (event.key === "ArrowDown") {
-          selectedIndex = (selectedIndex + 1) % items.length;
-          updateActiveSuggestion(items);
-          ensureVisible(items[selectedIndex]);
-          event.preventDefault();
-        } else if (event.key === "ArrowUp") {
-          selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-          updateActiveSuggestion(items);
-          ensureVisible(items[selectedIndex]);
-          event.preventDefault();
-        } else if (
-          (event.key === "Enter" || event.key === "Tab") &&
-          selectedIndex > -1
-        ) {
-          event.preventDefault();
-          const selectedTag = items[selectedIndex].textContent;
-          insertTagIntoEditor(selectedTag, cm.getCursor(), cm);
-          clearSuggestions();
-          cm.focus();
-        }
-      });
+// Đảm bảo mục được chọn luôn nằm trong khung nhìn của popup
+function ensureVisible(activeItem) {
+  const suggestionsBox = activeItem.parentNode;
+  const itemTop = activeItem.offsetTop;
+  const itemBottom = itemTop + activeItem.clientHeight;
+  const boxTop = suggestionsBox.scrollTop;
+  const boxBottom = boxTop + suggestionsBox.clientHeight;
 
-      // Ensure the active item is visible in the suggestions box
-      function ensureVisible(activeItem) {
-        const suggestionsBox = activeItem.parentNode;
+  if (itemTop < boxTop) {
+    suggestionsBox.scrollTop = itemTop;
+  } else if (itemBottom > boxBottom) {
+    suggestionsBox.scrollTop = itemBottom - suggestionsBox.clientHeight;
+  }
+}
 
-        const itemTop = activeItem.offsetTop;
-        const itemBottom = itemTop + activeItem.clientHeight;
-        const boxTop = suggestionsBox.scrollTop;
-        const boxBottom = boxTop + suggestionsBox.clientHeight;
+// Hàm cập nhật mục gợi ý đang chọn
+function updateActiveSuggestion(items) {
+  items.forEach((item, index) => {
+    item.classList.remove("active");
+    if (index === selectedIndex) {
+      item.classList.add("active");
+      ensureVisible(item);
+    }
+  });
+}
 
-        if (itemTop < boxTop) {
-          suggestionsBox.scrollTop = itemTop;
-        } else if (itemBottom > boxBottom) {
-          suggestionsBox.scrollTop = itemBottom - suggestionsBox.clientHeight;
-        }
-      }
 
-      // Update active suggestion style
-      function updateActiveSuggestion(items) {
-        items.forEach((item, index) => {
-          item.classList.remove("active");
-          if (index === selectedIndex) {
-            item.classList.add("active");
-          }
-        });
-      }
+// Hàm đảm bảo mục được chọn luôn nằm trong vùng nhìn thấy
+function ensureVisible(activeItem) {
+  const suggestionsBox = activeItem.parentNode;
+
+  // Vị trí của mục được chọn so với khung nhìn
+  const itemTop = activeItem.offsetTop;
+  const itemHeight = activeItem.clientHeight;
+  const boxHeight = suggestionsBox.clientHeight;
+  const boxScrollTop = suggestionsBox.scrollTop;
+
+  // Tính toán để mục được chọn nằm ở giữa khung nhìn nếu có thể
+  const scrollTo = itemTop - boxHeight / 2 + itemHeight / 2;
+
+  // Cập nhật cuộn của khung chứa gợi ý
+  suggestionsBox.scrollTop = scrollTo;
+}
+
+
 
       // Insert a tag into the editor at the cursor
       function insertTagIntoEditor(tag, cursor, cm) {
@@ -784,45 +809,25 @@
             const closingTag = `</${tagMatch[1]}>`;
             cm.replaceRange(closingTag, cm.getCursor());
           }
-
-          event.preventDefault();
+                    event.preventDefault();
         }
       });
+      // Keydown event to handle tab key for inserting suggestion
+htmlEditor.on("keydown", function (cm, event) {
+  const cursor = cm.getCursor();
+  const items = document.querySelectorAll(".suggestion-item");
 
-      document
-        .getElementById("external-link-icon")
-        .addEventListener("click", function () {
-          const url = document.getElementById("address").value;
-          if (url) {
-            window.open(url, "_blank"); // Open the URL in a new tab
-          }
-        });
-      document.getElementById("copy").addEventListener("click", function () {
-        // Lấy giá trị từ ô input
-        var addressValue = document.getElementById("address").value;
+  if (event.key === "Tab" && selectedIndex > -1) {
+    event.preventDefault();
+    const selectedSuggestion = items[selectedIndex].textContent;
+    insertTagIntoEditor(selectedSuggestion, cursor, cm);
+    clearSuggestions();
+    cm.focus();
+  }
+});
 
-        // Kiểm tra nếu giá trị không trống
-        if (addressValue) {
-          // Tạo một phần tử tạm thời để sao chép giá trị
-          var tempInput = document.createElement("textarea");
-          tempInput.value = addressValue;
-          document.body.appendChild(tempInput);
-          tempInput.select();
-          tempInput.setSelectionRange(0, 99999);
-          document.execCommand("copy");
-          document.body.removeChild(tempInput);
 
-          // Hiển thị thông báo popup
-          var popup = document.getElementById("popup");
-          popup.classList.add("show");
 
-          // Ẩn popup sau 2 giây
-          setTimeout(function () {
-            popup.classList.remove("show");
-          }, 2000);
-        }
-        // Không cần thông báo khi không có giá trị
-      });
     </script>
   </body>
 </html>
