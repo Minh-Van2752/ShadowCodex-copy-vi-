@@ -843,7 +843,40 @@ htmlEditor.on("keydown", function (cm, event) {
     cm.focus();
   }
 });
+      document
+        .getElementById("external-link-icon")
+        .addEventListener("click", function () {
+          const url = document.getElementById("address").value;
+          if (url) {
+            window.open(url, "_blank"); // Open the URL in a new tab
+          }
+        });
+      document.getElementById("copy").addEventListener("click", function () {
+        // Lấy giá trị từ ô input
+        var addressValue = document.getElementById("address").value;
 
+        // Kiểm tra nếu giá trị không trống
+        if (addressValue) {
+          // Tạo một phần tử tạm thời để sao chép giá trị
+          var tempInput = document.createElement("textarea");
+          tempInput.value = addressValue;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          tempInput.setSelectionRange(0, 99999);
+          document.execCommand("copy");
+          document.body.removeChild(tempInput);
+
+          // Hiển thị thông báo popup
+          var popup = document.getElementById("popup");
+          popup.classList.add("show");
+
+          // Ẩn popup sau 2 giây
+          setTimeout(function () {
+            popup.classList.remove("show");
+          }, 2000);
+        }
+        // Không cần thông báo khi không có giá trị
+      });
 
 
     </script>
